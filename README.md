@@ -1,6 +1,6 @@
 # Chromium in Docker for ARM with Widevine
 This is a Google Chromium container using the armhf architecture.
-Currently, it provides Widevine CDM support.
+Currently, it provides Widevine CDM support with Hardware Acceleration enabled.
 
 
 ## Build Docker Container Image
