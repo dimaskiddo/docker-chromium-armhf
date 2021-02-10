@@ -1,0 +1,75 @@
+#!/bin/bash
+
+set -e
+
+echo "--------------------------------------------------"
+echo "Dockerfile Build Tools"
+echo "Email: dimas.restu@student.upi.edu"
+echo "--------------------------------------------------"
+
+echo ""
+echo "[1] Run Some Housekeeping"
+echo "--------------------------------------------------"
+chmod 770 /root \
+  && chmod 664 /root/.bashrc \
+  && chmod 664 /root/.profile \
+  && chmod 664 /etc/passwd \
+  && find /usr/local/docker -type d -exec chmod 755 {} \; \
+  && find /usr/local/docker -type f -exec chmod 644 {} \; \
+  && chmod 755 /usr/local/docker/bin/* \
+  && cp -R /bin/sh /bin/sh.orig~ \
+  && ln -sf /bin/bash /bin/sh
+
+
+echo ""
+echo "[2] Installing Requirements"
+echo "--------------------------------------------------"
+apt-get -y -o Acquire::Check-Valid-Until=false update \
+  && apt-get -y -o Acquire::Check-Valid-Until=false --no-install-recommends install \
+      pulseaudio-utils \
+      libpulse0 \
+      libgl1-mesa-glx \
+  && apt-get -y -o Acquire::Check-Valid-Until=false purge --autoremove \
+  && apt-get -y -o Acquire::Check-Valid-Until=false clean
+
+
+echo ""
+echo "[3] Installing Chromium"
+echo "--------------------------------------------------"
+apt-get -y -o Acquire::Check-Valid-Until=false update \
+  && apt-get -y -o Acquire::Check-Valid-Until=false --no-install-recommends install \
+      /usr/local/docker/packages/chromium-browser_78.0.3904.97_armhf.deb \
+      /usr/local/docker/packages/chromium-codecs-ffmpeg-extra_78.0.3904.97_armhf.deb \
+  && apt-get -y -o Acquire::Check-Valid-Until=false purge --autoremove \
+  && apt-get -y -o Acquire::Check-Valid-Until=false clean \
+  && rm -rf /usr/local/docker/packages
+
+
+echo ""
+echo "[4] Installing Chromium Plugins"
+echo "--------------------------------------------------"
+mv /usr/local/docker/plugins/pepper \
+   /usr/lib/chromium-browser/pepper \
+   && mv /usr/local/docker/plugins/libwidevinecdm.so \
+         /usr/lib/chromium-browser/libwidevinecdm.so \
+   && rm -rf /usr/local/docker/plugins
+
+
+echo ""
+echo "[5] Configuring Pulse Audio"
+echo "--------------------------------------------------"
+mv /usr/local/docker/etc/pulse/client.conf \
+   /etc/pulse/client.conf \
+   && rm -rf /usr/local/docker/etc
+
+
+echo ""
+echo "[6] Configuring User"
+echo "--------------------------------------------------"
+mkdir -p "/home/user" \
+  && echo "user:x:1000:1000:User,,,:/home/user:/bin/bash" >> /etc/passwd \
+  && echo "user:x:1000:" >> /etc/group \
+  && chown 1000:1000 -R /home/user \
+  && gpasswd -a user audio
+
+exit
