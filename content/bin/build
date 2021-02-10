@@ -26,8 +26,6 @@ echo "[2] Installing Requirements"
 echo "--------------------------------------------------"
 apt-get -y -o Acquire::Check-Valid-Until=false update \
   && apt-get -y -o Acquire::Check-Valid-Until=false --no-install-recommends install \
-      pulseaudio-utils \
-      libpulse0 \
       libgl1-mesa-glx \
   && apt-get -y -o Acquire::Check-Valid-Until=false purge --autoremove \
   && apt-get -y -o Acquire::Check-Valid-Until=false clean
@@ -56,20 +54,11 @@ mv /usr/local/docker/plugins/pepper \
 
 
 echo ""
-echo "[5] Configuring Pulse Audio"
-echo "--------------------------------------------------"
-mv /usr/local/docker/etc/pulse/client.conf \
-   /etc/pulse/client.conf \
-   && rm -rf /usr/local/docker/etc
-
-
-echo ""
-echo "[6] Configuring User"
+echo "[5] Configuring User"
 echo "--------------------------------------------------"
 mkdir -p "/home/user" \
   && echo "user:x:1000:1000:User,,,:/home/user:/bin/bash" >> /etc/passwd \
   && echo "user:x:1000:" >> /etc/group \
-  && chown 1000:1000 -R /home/user \
-  && gpasswd -a user audio
+  && chown 1000:1000 -R /home/user
 
 exit

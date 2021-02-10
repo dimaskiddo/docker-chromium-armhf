@@ -1,24 +1,11 @@
 #!/bin/bash
 
-echo "Set Host IP for Pulse Audio"
-CHROMIUM_ADDR_IP="$(docker network inspect bridge --format='{{(index .IPAM.Config 0).Gateway}}')"
-
 echo "Enabling XHost Forwarding"
 xhost +local:docker
 
-echo -n "Pulse Audio Native Protocol TCP: "
-if pactl list modules | grep native-protocol-tcp >/dev/null; then
-  echo Checked
-else
-  pactl load-module module-native-protocol-tcp >/dev/null && echo Loaded || echo Failed
-fi
-
 echo "Running Chromium"
-docker pull dimaskiddo/ubuntu-armhf:chromium-78.0
-docker run --rm --privileged \
+docker run -d --rm --privileged \
   -e DISPLAY=unix$DISPLAY \
-  -e PULSE_SERVER=tcp:$CHROMIUM_ADDR_IP:4713 \
-  -e PULSE_COOKIE=`COOKIE_FILE="$HOME/.config/pulse/cookie"; COOKIE_FROM_FILE=$(test -f "${COOKIE_FILE}" && xxd -c 256 -p "${COOKIE_FILE}"); test "$(LC_ALL=C pax11publish -d | grep --color=never -Po '(?<=^Cookie: ).*')" != "${COOKIE_FROM_FILE}" && echo ${COOKIE_FROM_FILE}` \
   -v /etc/machine-id:/etc/machine-id \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
   -v /dev:/dev \
