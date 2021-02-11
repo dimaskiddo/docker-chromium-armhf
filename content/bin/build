@@ -10,23 +10,21 @@ echo "--------------------------------------------------"
 echo ""
 echo "[1] Run Some Housekeeping"
 echo "--------------------------------------------------"
-chmod 770 /root \
-  && chmod 664 /root/.bashrc \
-  && chmod 664 /root/.profile \
-  && chmod 664 /etc/passwd \
+mv /bin/sh /bin/sh.orig~ \
+  && ln -sf /bin/bash /bin/sh \
   && find /usr/local/docker -type d -exec chmod 755 {} \; \
   && find /usr/local/docker -type f -exec chmod 644 {} \; \
-  && chmod 755 /usr/local/docker/bin/* \
-  && cp -R /bin/sh /bin/sh.orig~ \
-  && ln -sf /bin/bash /bin/sh
+  && chmod 755 /usr/local/docker/bin/*
 
 
 echo ""
 echo "[2] Installing Requirements"
 echo "--------------------------------------------------"
-apt-get -y -o Acquire::Check-Valid-Until=false update \
+echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
+  && apt-get -y -o Acquire::Check-Valid-Until=false update \
   && apt-get -y -o Acquire::Check-Valid-Until=false --no-install-recommends install \
       libgl1-mesa-glx \
+      ttf-mscorefonts-installer \
   && apt-get -y -o Acquire::Check-Valid-Until=false purge --autoremove \
   && apt-get -y -o Acquire::Check-Valid-Until=false clean
 
@@ -54,7 +52,43 @@ mv /usr/local/docker/plugins/pepper \
 
 
 echo ""
-echo "[5] Configuring User"
+echo "[5] Configuring Fonts"
+echo "--------------------------------------------------"
+{ \
+  echo "<?xml version=\"1.0\"?>"; \
+  echo "<!DOCTYPE fontconfig SYSTEM \"fonts.dtd\">"; \
+  echo "<fontconfig>"; \
+  echo "  <!-- Use the Antialiasing -->"; \
+  echo "  <match target=\"font\">"; \
+  echo "    <edit name=\"antialias\" mode=\"assign\"><bool>true</bool></edit>"; \
+  echo "  </match>"; \
+  echo "</fontconfig>"; \
+} > /etc/fonts/conf.d/10-antialias.conf \
+  && { \
+       echo "<?xml version=\"1.0\"?>"; \
+       echo "<!DOCTYPE fontconfig SYSTEM \"fonts.dtd\">"; \
+       echo "<fontconfig>"; \
+       echo "  <!-- Use Hinting -->"; \
+       echo "  <match target=\"font\">"; \
+       echo "    <edit name=\"hinting\" mode=\"assign\"><bool>true</bool></edit>"; \
+       echo "  </match>"; \
+       echo "</fontconfig>"; \
+     } > /etc/fonts/conf.d/10-hinting.conf \
+  && { \
+       echo "<?xml version=\"1.0\"?>"; \
+       echo "<!DOCTYPE fontconfig SYSTEM \"fonts.dtd\">"; \
+       echo "<fontconfig>"; \
+       echo "  <!-- Use Slight Hinting -->"; \
+       echo "  <match target=\"font\">"; \
+       echo "    <edit name=\"hintstyle\" mode=\"assign\"><const>hintslight</const></edit>"; \
+       echo "  </match>"; \
+       echo "</fontconfig>"; \
+    } > /etc/fonts/conf.d/10-hinting-slight.conf \
+  && fc-cache -fv
+
+
+echo ""
+echo "[5] Configuring Users"
 echo "--------------------------------------------------"
 mkdir -p "/home/user" \
   && echo "user:x:1000:1000:User,,,:/home/user:/bin/bash" >> /etc/passwd \

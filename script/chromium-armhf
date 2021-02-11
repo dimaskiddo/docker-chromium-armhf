@@ -1,11 +1,10 @@
 #!/bin/bash
 
-echo "Enabling XHost Forwarding"
 xhost +local:docker
 
-echo "Running Chromium"
 docker run -d --rm --privileged \
   -e DISPLAY=unix$DISPLAY \
+  -v $HOME:/home/user \
   -v /etc/machine-id:/etc/machine-id \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
   -v /dev:/dev \

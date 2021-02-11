@@ -23,8 +23,9 @@ Then you can run the image using the following command:
 ```
 docker pull dimaskiddo/ubuntu-armhf:chromium-78.0
 
-docker run --rm --privileged \
+docker run -d --rm --privileged \
   -e DISPLAY=unix$DISPLAY \
+  -v $HOME:/home/user \  
   -v /etc/machine-id:/etc/machine-id \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
   -v /dev:/dev \
