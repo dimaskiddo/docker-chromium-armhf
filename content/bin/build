@@ -10,9 +10,7 @@ echo "--------------------------------------------------"
 echo ""
 echo "[1] Run Some Housekeeping"
 echo "--------------------------------------------------"
-mv /bin/sh /bin/sh.orig~ \
-  && ln -sf /bin/bash /bin/sh \
-  && find /usr/local/docker -type d -exec chmod 755 {} \; \
+find /usr/local/docker -type d -exec chmod 755 {} \; \
   && find /usr/local/docker -type f -exec chmod 644 {} \; \
   && chmod 755 /usr/local/docker/bin/*
 
@@ -21,23 +19,17 @@ echo ""
 echo "[2] Installing Requirements"
 echo "--------------------------------------------------"
 echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | debconf-set-selections \
-  && apt-get -y -o Acquire::Check-Valid-Until=false update \
   && apt-get -y -o Acquire::Check-Valid-Until=false --no-install-recommends install \
       libgl1-mesa-glx \
-      ttf-mscorefonts-installer \
-  && apt-get -y -o Acquire::Check-Valid-Until=false purge --autoremove \
-  && apt-get -y -o Acquire::Check-Valid-Until=false clean
+      ttf-mscorefonts-installer
 
 
 echo ""
 echo "[3] Installing Chromium"
 echo "--------------------------------------------------"
-apt-get -y -o Acquire::Check-Valid-Until=false update \
-  && apt-get -y -o Acquire::Check-Valid-Until=false --no-install-recommends install \
-      /usr/local/docker/packages/chromium-browser_78.0.3904.97_armhf.deb \
-      /usr/local/docker/packages/chromium-codecs-ffmpeg-extra_78.0.3904.97_armhf.deb \
-  && apt-get -y -o Acquire::Check-Valid-Until=false purge --autoremove \
-  && apt-get -y -o Acquire::Check-Valid-Until=false clean \
+apt-get -y -o Acquire::Check-Valid-Until=false --no-install-recommends install \
+  /usr/local/docker/packages/chromium-browser_*_armhf.deb \
+  /usr/local/docker/packages/chromium-codecs-ffmpeg-extra_*_armhf.deb \
   && rm -rf /usr/local/docker/packages
 
 
@@ -88,11 +80,18 @@ echo "--------------------------------------------------"
 
 
 echo ""
-echo "[5] Configuring Users"
+echo "[6] Configuring Users"
 echo "--------------------------------------------------"
 mkdir -p "/home/user" \
   && echo "user:x:1000:1000:User,,,:/home/user:/bin/bash" >> /etc/passwd \
   && echo "user:x:1000:" >> /etc/group \
   && chown 1000:1000 -R /home/user
+
+
+echo ""
+echo "[7] Cleaning-Up"
+echo "--------------------------------------------------"
+apt-get -y -o Acquire::Check-Valid-Until=false purge --autoremove \
+  && apt-get -y -o Acquire::Check-Valid-Until=false clean \
 
 exit

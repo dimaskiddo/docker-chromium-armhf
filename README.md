@@ -34,11 +34,11 @@ docker run -d --rm --privileged \
   dimaskiddo/ubuntu-armhf:chromium-78.0
 ```
 
-Or simply use the script chromium-armhf:
+Or simply use the script chromium-browser:
 ```
-sudo cp script/chromium-armhf /usr/local/bin
-sudo chmod 755 /usr/local/bin/chromium-armhf
-chromium-armhf
+sudo cp script/chromium-browser /usr/local/bin
+sudo chmod 755 /usr/local/bin/chromium-browser
+chromium-browser
 ```
 
 

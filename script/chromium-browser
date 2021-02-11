@@ -1,0 +1,31 @@
+#!/bin/bash
+
+xhost +local:docker
+
+IS_STARTED=`docker ps | grep chromium | wc -l`
+
+if [[ $IS_STARTED -eq 1 ]]
+then
+  docker exec chromium \
+    chromium-browser \
+    --disable-features=RendererCodeIntegrity \
+    --user-agent='Mozilla/5.0 (X11; CrOS armv7l 12607.82.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.129 Safari/537.36' \
+    $@
+else
+  docker run -d --rm --privileged \
+    -e DISPLAY=unix$DISPLAY \
+    -v $HOME:/home/user \
+    -v /etc/machine-id:/etc/machine-id \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -v /dev:/dev \
+    -v /run:/run \
+    --ipc=host \
+    --name=chromium \
+    dimaskiddo/ubuntu-armhf:chromium-78.0 \
+    chromium-browser \
+    --disable-features=RendererCodeIntegrity \
+    --user-agent='Mozilla/5.0 (X11; CrOS armv7l 12607.82.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.129 Safari/537.36' \
+    $@
+fi
+
+exit 0
